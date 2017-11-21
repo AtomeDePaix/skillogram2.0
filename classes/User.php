@@ -12,6 +12,7 @@ class User {
         $login = $this->login;
         $salt = mt_rand(1,100);
         $password = md5($this->password . $salt);
+        $username = $this->username;
         $stmt = DBconnect::$db->prepare("SELECT id FROM user_auth WHERE login =?");
         $stmt ->execute([$login]);
         $user_exist = $stmt->fetch();
@@ -32,6 +33,7 @@ class User {
     public function logIn () {
         $login = $this->login;
         $password = md5($this->password . $salt);
+        $username = $this->username;
         $stmt = DBconnect::$db->prepare("SELECT id FROM user_auth WHERE login =?");
         $stmt ->execute([$login]);
         $result = $stmt->fetch();
@@ -42,9 +44,10 @@ class User {
               $stmt = $dbh->prepare("SELECT * FROM user, user_auth WHERE user.user_id = user_auth.id");
               $stmt ->execute();
               $result2 = $stmt->fetch();
-              $_SESSION['username'] = $result2['name'];
+              $_SESSION['username'] = $result2['username'];
+              $_SESSION['message'] = "Добро пожаловать, $username";
               } else {
-               $_SESSION['message']['badinput'] = 'Неверный логин или пароль';
+              $_SESSION['message']['badinput'] = 'Неверный логин или пароль';
               }
         }
     }

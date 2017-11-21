@@ -1,11 +1,11 @@
 <?php
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        if (empty($_POST['login']) || empty($_POST['password'])) {
-            $_SESSION['message'] = 'Не введен логин или пароль';
+        if (empty($_POST['login']) || empty($_POST['password']) || empty($_POST['username'])) {
+            $_SESSION['message'] = 'Не введен логин или пароль или имя';
             header('Location: index.php?act=sign_up');
             exit;
         } else {
-            $user = new User($_POST['login'],$_POST['password']);
+            $user = new User($_POST['login'],$_POST['password'], $_POST['username']);
             $user->addUser();
         }
     }
