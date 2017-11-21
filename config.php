@@ -1,5 +1,5 @@
 <?php
-$db_host = '127.0.0.1';
+$db_host = 'localhost';
 $db_user = 'root';
 $db_pass = '1234567';
 $db_name = 'skillogram';

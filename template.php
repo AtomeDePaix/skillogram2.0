@@ -7,8 +7,16 @@
             <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
+        <div>
+            <?php 
+            if (!empty($_SESSION['message'])):
+                echo($_SESSION['message']);
+                unset($_SESSION['message']);
+            endif; 
+            ?>
+        </div>
         <header>
-            <!--<a href=""><div id="logo"></div></a>-->
+            <!--<a href="index.php"><div id="logo"></div></a>-->
             <div class="menu-container">
                     <ul class="menu">
                         <li><a href="index.php">Главная</a></li>
@@ -21,30 +29,32 @@
             </div>
             <div class="search-form-container">
                     <form action="" method="post">
-               	        <input type="text" placeholder="Поиск..." name="search" value="<?=@$_POST['search'];?>">
+                        <input type="text" placeholder="Поиск..." name="search" value="<?=@$_POST['search'];?>">
                         <input type="submit" value="OK">
                     </form>
             </div>
         </header>
-
+            <hr/>
+            <?=$content; ?>
+            <hr/>
         <div class="footer">
-        <?php 
-            $counter_file = 'counter.txt';
-            if(file_exists($counter_file)) {
-            $counter = file_get_contents($counter_file);
-            } else {
-             $counter = 0;
-            }
-            $counter++;
+            <?php 
+                $counter_file = 'counter.txt';
+                if(file_exists($counter_file)) {
+                $counter = file_get_contents($counter_file);
+                } else {
+                 $counter = 0;
+                }
+                $counter++;
 
-            file_put_contents($counter_file, $counter);
-            echo $counter;
+                file_put_contents($counter_file, $counter);
+                echo $counter;
 
-        ?></br>
-        <?php
-            echo '&copy';
-            echo date ('Y');
-        ?>
+            ?></br>
+            <?php
+                echo '&copy';
+                echo date ('Y');
+            ?>
         </div>
     </body>
 </html>
