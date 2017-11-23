@@ -54,6 +54,8 @@
     height: 30px;
     margin: 5px 5px 5px 0px;
     float: left;
+    background:url(images/heart.jpg) left center no-repeat;
+    background-size:25px 25px;
 }
 .like-sum {
 	color: #000000;

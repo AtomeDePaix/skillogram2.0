@@ -1,4 +1,5 @@
 <?php
+
 class Post {
         
     public function addPost($photo, $comment) {
@@ -26,9 +27,8 @@ class Post {
     }
     
     public function getPosts() {
-        $stmt = DBconnect::$db->prepare("SELECT * FROM post INNER JOIN user ON user.user_id = post.user_id");
+        $stmt = DBconnect::$db->prepare("SELECT * FROM post INNER JOIN user ON user.user_id = post.user_id ORDER BY post.id DESC");
         $stmt->execute();
-        return $stmt;
-        
+        return $stmt;        
     }
 }

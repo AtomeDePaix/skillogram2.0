@@ -1,7 +1,6 @@
 <?php
+
 require 'common.php';
-require './classes/User.php';
-require './classes/Post.php';
 
 $content = '';
 
@@ -12,10 +11,12 @@ if (!file_exists($filename)) {
     $filename = './actions/404.php';
 }
 
-ob_start();
-require $filename;
-$content = ob_get_clean();
+try {
+    ob_start();
+    require $filename;
+    $content = ob_get_clean();
+} catch (Exception $e) {
+    $content = $e->getMessage();
+}
 
 require 'template.php';
-//test commit
-
