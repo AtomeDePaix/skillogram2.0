@@ -1,54 +1,70 @@
 <?php
+
 class User {
-    private $login, $password, $salt, $username;
-    
-    public function __construct($login, $password, $username) {
-        $this->login = $login;
-        $this->password = $password;
-        $this->username = $username;
+
+    public $login, $password, $salt, $username, $avatar, $user_id;
+
+    private function __construct($user_id) {
+        $this->user_id = $user_id;
+        
+        $stmt = DBconnect::$db->prepare("SELECT * FROM user INNER JOIN user_auth ON user.user_id = user_auth.id WHERE user.user_id = ?");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch();
+        
+        $this->login = $user['login'];
+        $this->password = $user['password'];
+        $this->salt = $user['salt'];
+        $this->username = $user['username'];
+        $this->avatar = $user['avatar'];
     }
-    
-    public function addUser() {
-        $login = $this->login;
-        $salt = mt_rand(1,100);
-        $password = md5($this->password . $salt);
-        $username = $this->username;
-        $stmt = DBconnect::$db->prepare("SELECT id FROM user_auth WHERE login =?");
-        $stmt ->execute([$login]);
-        $user_exist = $stmt->fetch();
-        if (!empty($user_exist['id'])) {
-            $_SESSION['message'] = 'Извините, введённый вами логин уже зарегистрирован. Введите другой логин.';
+
+    public function addUser($login, $password, $username, $avatar) {
+        $salt = mt_rand(1, 100);
+        $password = md5($password . $salt);
+//вносим данные в user_auth
+        try {
+            $stmt = DBconnect::$db->prepare("INSERT INTO user_auth SET login =?, password =?, salt =?");
+            $stmt->execute([$login, $password, $salt]);
+        } catch (Exception $e) {
+            $_SESSION['message'][] = 'Error: ' . $e->getMessage();
             header('Location: index.php?act=sign_up');
             exit;
-        } else {
-    //вносим данные нового пользователя
-        $stmt = DBconnect::$db->prepare("INSERT INTO user SET username =?");
-        $stmt->execute([$username]);
-        $stmt = DBconnect::$db->prepare("INSERT INTO user_auth SET login =?, password =?, salt =?");
-        $stmt->execute([$login, $password, $salt]);
         }
-        $_SESSION['message'] = "Пользователь $username успешно зарегистрирован";
+        $_SESSION['message'][] = "Пользователь $login успешно зарегистрирован";
+        $new_user_id = DBconnect::$db->lastInsertId();
+//сохраняем аватар        
+        if (!file_exists('images/avatars')) {
+            mkdir('images/avatars', 0777, true);
+        } else if ($avatar && file_exists($avatar['tmp_name'])) {
+            $filename = $avatar['name'];
+            $tmp = explode('.', $filename);
+            $extension = end($tmp);
+            $allowed_extension = ['jpg', 'png', 'jpeg', 'bmp'];
+            if (!in_array($extension, $allowed_extension)) {
+                $avatar_path = '';
+                $_SESSION['message'][] = "Недопустимое расширение аватара.";
+            }
+            $avatar_path = 'images/avatars/avatar' . $new_user_id . "." . $extension;
+            move_uploaded_file($avatar['tmp_name'], $avatar_path);
+        }  
+        $stmt = DBconnect::$db->prepare("INSERT INTO user SET user_id = ?, username = ?, avatar = ?");
+        $stmt->execute([$new_user_id, $username, $avatar_path]);  
+        $_SESSION['message'][] = "Пользователь $login ($username) успешно зарегистрирован";
     }
-    
-    public function logIn () {
-        $login = $this->login;
-        $password = md5($this->password . $salt);
-        $username = $this->username;
-        $stmt = DBconnect::$db->prepare("SELECT id FROM user_auth WHERE login =?");
-        $stmt ->execute([$login]);
-        $result = $stmt->fetch();
-        if (!empty($result)) {
-            if (md5($password . $result['salt']) == $result['password']) {
-              $_SESSION['last_ip']=$_SERVER['REMOTE_ADDR'];
-              setcookie ('last_login', $_REQUEST["login"], time()+86400,'/');
-              $stmt = $dbh->prepare("SELECT * FROM user, user_auth WHERE user.user_id = user_auth.id");
-              $stmt ->execute();
-              $result2 = $stmt->fetch();
-              $_SESSION['username'] = $result2['username'];
-              $_SESSION['message'] = "Добро пожаловать, $username";
-              } else {
-              $_SESSION['message']['badinput'] = 'Неверный логин или пароль';
-              }
+
+    public function logIn($login, $password) {
+        $stmt = DBconnect::$db->prepare("SELECT * FROM user INNER JOIN user_auth ON user.user_id = user_auth.id WHERE user_auth.login = ?");
+        $stmt->execute([$login]);
+        $user = $stmt->fetch();
+        if (!empty($user)) {
+            if (md5($password . $user['salt']) == $user['password']) {
+                //setcookie('recent_user', $login, time() + 86400, '/');
+                $_SESSION['recent_user'] = $user['user_id'];
+                $_SESSION['message'][] = "Приветствую, " . $user['username'] . " !";
+            } else {
+                $_SESSION['message'][] = "Неправильная пара логин/пароль.";
+            }
         }
     }
+
 }

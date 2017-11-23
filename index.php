@@ -1,6 +1,7 @@
 <?php
 require 'common.php';
 require './classes/User.php';
+require './classes/Post.php';
 
 $content = '';
 

@@ -9,10 +9,12 @@
     <body>
         <div>
             <?php 
-            if (!empty($_SESSION['message'])):
-                echo($_SESSION['message']);
-                unset($_SESSION['message']);
-            endif; 
+            if (!empty($_SESSION['message'])) {
+                foreach ($_SESSION['message'] as $massage) {
+                    echo("$massage<br/>");
+                }
+                    unset($_SESSION['message']);
+            } 
             ?>
         </div>
         <header>
