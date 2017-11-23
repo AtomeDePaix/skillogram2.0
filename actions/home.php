@@ -5,7 +5,7 @@ $stmt = Post::getPosts();
 ?>
 <div class="content">
     <?php while ($post = $stmt->fetch()): ?>
-        <div class="post">
+        <div class="post" data-post-id=<?=$post['post_id'];?>>
             <div class="avatar" >
                 <img src=<?=$post['avatar'];?> width="40" height="40">
             </div>

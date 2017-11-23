@@ -5,6 +5,8 @@
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8;" />
         <meta http-equiv="X-UA-Compatible" content="IE=10" />
         <link rel="stylesheet" type="text/css" href="style.css">
+        <script type="text/javascript" src="assets/js/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript" src="assets/js/script.js"></script>
     </head>
     <body>
         <div>

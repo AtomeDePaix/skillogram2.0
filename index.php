@@ -8,7 +8,7 @@ $act = !empty($_REQUEST['act']) ? $_REQUEST['act'] : 'home';
 
 $filename = './actions/' . basename($act) . '.php';
 if (!file_exists($filename)) {
-    $filename = './actions/404.php';
+    $filename = 'actions/404.php';
 }
 
 try {

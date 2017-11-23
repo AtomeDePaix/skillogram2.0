@@ -27,7 +27,7 @@ class Post {
     }
     
     public function getPosts() {
-        $stmt = DBconnect::$db->prepare("SELECT * FROM post INNER JOIN user ON user.user_id = post.user_id ORDER BY post.id DESC");
+        $stmt = DBconnect::$db->prepare("SELECT *, post.id AS post_id FROM post INNER JOIN user ON user.user_id = post.user_id ORDER BY post.id DESC");
         $stmt->execute();
         return $stmt;        
     }
