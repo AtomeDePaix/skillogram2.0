@@ -15,7 +15,13 @@ class User {
      * @return \self
      */
     public static function getById($user_id) {
-        $stmt = DBconnect::$db->prepare("SELECT * FROM user INNER JOIN user_auth ON user.user_id = user_auth.id WHERE user.user_id = ?");
+        $connection = DBconnect::getInstance();
+        $db = $connection->getConnection();
+        $stmt = $db->prepare(""
+                . "SELECT * FROM user "
+                . "INNER JOIN user_auth "
+                . "ON user.user_id = user_auth.id "
+                . "WHERE user.user_id = ?");
         $stmt->execute([$user_id]);
         $user = $stmt->fetch();
         
@@ -48,16 +54,43 @@ class User {
         return $this;
     }
     
+    public function getAvatar() {
+        return $this->data['avatar'];
+    }
+    
+    public function setAvatar($value) {
+        $this->data['avatar'] = $value;
+        return $this;
+    }
+    
+        public function getUsername() {
+        return $this->data['username'];
+    }
+    
+    public function setUsername($value) {
+        $this->data['username'] = $value;
+        return $this;
+    }
+    
     public function addUser($login, $password, $username, $avatar) {
         $salt = mt_rand(1, 100);
         $password = md5($password . $salt);
         
+        if (empty($username)) {
+            $username = 'Anonymous';
+        }
+        
         // Вносим данные в user_auth
         try {
-            $stmt = DBconnect::$db->prepare("INSERT INTO user_auth SET login = ?, password = ?, salt = ?");
+            $connection = DBconnect::getInstance();
+            $db = $connection->getConnection();
+            $stmt = $db->prepare(""
+                    . "INSERT INTO user_auth "
+                    . "SET login = ?, password = ?, salt = ?");
             $stmt->execute([$login, $password, $salt]);
-            $_SESSION['message'][] = "Пользователь $login успешно зарегистрирован";
-            $new_user_id = DBconnect::$db->lastInsertId();
+            $helper = Helper::getInstance();
+            $message = $helper->setMessage("Пользователь $login успешно зарегистрирован");
+            $new_user_id = $db->lastInsertId();
         } catch (Exception $e) {
             $_SESSION['message'][] = 'Error: ' . $e->getMessage();
             header('Location: index.php?act=sign_up');
@@ -74,30 +107,46 @@ class User {
             $allowed_extensions = ['jpg', 'png', 'jpeg', 'bmp'];
             if (!in_array($extension, $allowed_extensions)) {
                 $avatar_path = '';
-                $_SESSION['message'][] = "Недопустимое расширение аватара.";
+                $helper = Helper::getInstance();
+                $message = $helper->setMessage("Недопустимое расширение аватара");
             }
             
             $avatar_path = 'images/avatars/avatar' . $new_user_id . "." . $extension;
             move_uploaded_file($avatar['tmp_name'], $avatar_path);
+        } else {
+            $avatar_path = 'images/avatars/avatar/noavatar.png';
         }
         
-        $stmt = DBconnect::$db->prepare("INSERT INTO user SET user_id = ?, username = ?, avatar = ?");
+        $connection = DBconnect::getInstance();
+        $db = $connection->getConnection();
+        $stmt = $db->prepare(""
+                . "INSERT INTO user "
+                . "SET user_id = ?, username = ?, avatar = ?");
         $stmt->execute([$new_user_id, $username, $avatar_path]);  
-        $_SESSION['message'][] = "Пользователь $login ($username) успешно зарегистрирован";
+        $helper = Helper::getInstance();
+        $message = $helper->setMessage("Пользователь $login ($username) успешно зарегистрирован");
     }
 
     public function logIn($login, $password) {
-        $stmt = DBconnect::$db->prepare("SELECT * FROM user INNER JOIN user_auth ON user.user_id = user_auth.id WHERE user_auth.login = ?");
+        $connection = DBconnect::getInstance();
+        $db = $connection->getConnection();
+        $stmt = $db->prepare(""
+                . "SELECT * FROM user "
+                . "INNER JOIN user_auth "
+                . "ON user.user_id = user_auth.id "
+                . "WHERE user_auth.login = ?");
         $stmt->execute([$login]);
         $user = $stmt->fetch();
         
         if (!empty($user)) {
             if (md5($password . $user['salt']) == $user['password']) {
-                setcookie('recent_user', $login, time() + 86400, '/');
-                $_SESSION['recent_user'] = $user['user_id'];
-                $_SESSION['message'][] = "Приветствую, " . $user['username'] . " !";
+                setcookie('last_login', $login, time() + 604800, '/');
+                $_SESSION['user_id'] = $user['user_id'];
+                $helper = Helper::getInstance();
+                $message = $helper->setMessage("Приветствую, " . $user['username'] . " !");
             } else {
-                $_SESSION['message'][] = "Неправильная пара логин/пароль.";
+                $helper = Helper::getInstance();
+                $message = $helper->setMessage("Неправильная пара логин/пароль");
             }
         }
     }

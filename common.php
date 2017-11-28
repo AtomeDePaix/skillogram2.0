@@ -2,10 +2,14 @@
 
 session_start();
 
-require 'config.php';
+require 'config.php.blank';
 require 'classes/DBconnect.php';
 require 'classes/User.php';
 require 'classes/Post.php';
+require 'classes/Helper.php';
 
-$connect = new DBconnect();
-$connect->connect($db_type, $db_host, $db_user, $db_pass, $db_name);
+DBconnect::setDbHost($db_host);
+DBconnect::setDbName($db_name);
+DBconnect::setDbPass($db_pass);
+DBconnect::setDbType($db_type);
+DBconnect::setDbUser($db_user);

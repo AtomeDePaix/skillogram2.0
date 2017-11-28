@@ -11,19 +11,16 @@
     <body>
         <div>
             <?php
-            if (!empty($_SESSION['message'])) {
-                foreach ($_SESSION['message'] as $massage) {
-                    echo("$massage<br/>");
-                }
-                unset($_SESSION['message']);
-            }
+            $helper = Helper::getInstance();
+            $message =  $helper->getMessage();
+            echo $message;
             ?>
-        </div>
+         </div>
         <header>
             <!--<a href="index.php"><div id="logo"></div></a>-->
             <div class="menu-container">
                 <ul class="menu">
-                    <li><a href="index.php">Главная</a></li>
+                    <li><a href="index.php?act=home">Главная</a></li>
                     <li><a href="index.php?act=sign_in">Вход</a></li>
                     <li><a href="index.php?act=sign_up">Регистрация</a></li>
                     <li><a href="index.php?act=post">Лента</a></li>
@@ -33,7 +30,7 @@
             </div>
             <div class="search-form-container">
                 <form action="" method="post">
-                    <input type="text" placeholder="Поиск..." name="search" value="<?= @$_POST['search']; ?>">
+                    <input type="text" placeholder="Поиск..." name="search" value="">
                     <input type="submit" value="OK">
                 </form>
             </div>
