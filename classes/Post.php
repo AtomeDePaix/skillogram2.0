@@ -3,9 +3,33 @@
 class Post {
 
     private $data;
+    private $data_adv;
+    private static $instance;
+    
+    public static function getInstance(){
+        if (empty(self::$instance)) {
+        self::$instance = new self();
+        }
+        return self::$instance;
+    }
 
-    private function __construct($data = []) {
-        $this->data = $data;
+    private function __construct() {
+        $connection = DBconnect::getInstance();
+        $db = $connection->getConnection();
+        $post = $db->prepare(""
+                . "SELECT *, post.id "
+                . "AS post_id FROM post "
+                . "INNER JOIN user "
+                . "ON user.user_id = post.user_id "
+                . "ORDER BY post.id DESC");
+        $post->execute();
+        $this->data[] = $post->fetchAll();
+        $post_adv = $db->prepare(""
+                . "SELECT *"
+                . "FROM post_adv"
+                . "ORDER BY post_adv.id DESC");
+        $post_adv->execute();
+        $this->data_adv[] = $post_adv->fetchAll();
     }
 
     public function getPhoto() {
@@ -38,13 +62,13 @@ class Post {
             $tmp = explode('.', $filename);
             $extension = end($tmp);
             $allowed_extension = ['jpg', 'png', 'jpeg', 'bmp'];
-            if (!in_array($extension, $allowed_extension)) {
+                if (!in_array($extension, $allowed_extension)) {
                 $photo_path = '';
                 $helper = Helper::getInstance();
                 $message = $helper->setMessage("Недопустимое расширение файла");
-            }
-            $photo_path = 'images/photos/photo' . date('Y-m-dH:i:s') . mt_rand(1, 1000) . "." . $extension;
-            move_uploaded_file($photo['tmp_name'], $photo_path);
+                }
+                $photo_path = 'images/photos/photo' . date('Y-m-dH:i:s') . mt_rand(1, 1000) . "." . $extension;
+                move_uploaded_file($photo['tmp_name'], $photo_path);
         }
         $connection = DBconnect::getInstance();
         $db = $connection->getConnection();
@@ -53,43 +77,42 @@ class Post {
                 . "SET user_id = ?, added_at = ?, photo = ?, comment = ?, like_sum = ?");
         $stmt->execute([$user_id, $added_at, $photo_path, $comment, $like_sum]);
     }
+    
+    public function getPost() {
+        
+        foreach ($this->data['0'] as $post){
+            $user_id = $post['user_id'];
+            $post_id = $post['post_id'];
+            $avatar = $post['avatar'];
+            $username = $post['username'];
+            $added_at = $post['added_at'];
+            $photo = $post['photo'];
+            $like_sum = $post['like_sum'];
+            $comment = $post['comment'];
+            
+            require 'assets/html/post.php';
+            
+            if($post['post_id'] % 5 == 0) {
+               $advs = $this->getAdvertising();
 
-    public function getPosts() {
-        $connection = DBconnect::getInstance();
-        $db = $connection->getConnection();
-        $stmt = $db->prepare(""
-                . "SELECT *, post.id "
-                . "AS post_id FROM post "
-                . "INNER JOIN user "
-                . "ON user.user_id = post.user_id "
-                . "ORDER BY post.id DESC");
-        $stmt->execute();
-        return $stmt;
+            }
+        }
     }
     
-    public function searchPosts() {
-        if (!empty($_REQUEST ['search'])) {
-            $where = 'WHERE post.comment LIKE ? OR user.name LIKE ?';
-            $search = '%' . $_REQUEST['search'] . '%';
-            $bind = [$search, $search];
-        } else {
-            $where = '';
-            $bind = [];
-        }
-        $connection = DBconnect::getInstance();
-        $db = $connection->getConnection();
-        $query = $db->prepare(""
-               . "SELECT *"
-               . "FROM post"
-               . "JOIN user ON post.user_id = user.user_id"
-               . "{$where}"
-               . "ORDER BY id DESC"
-               . "LIMIT 0,20");
-        $query->execute($bind);
-        return $query;
-
-        if ($query->rowCount() == 0) {
-            echo ('Извините, ничего не нашлось...');
+    public function getAdvertising() {
+        
+        foreach ($this->data_adv['0'] as $post_adv){
+            $id = $post_adv['id'];
+            $avatar = $post_adv['avatar'];
+            $name = $post_adv['name'];
+            $adv = $post_adv['adv'];
+            $photo = $post_adv['photo'];
+            $price = $post_adv['price'];
+            $comment = $post_adv['comment'];
+            
+            require 'assets/html/advertising_form.php';
         }
     }
+    
+    
 }

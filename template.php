@@ -30,7 +30,7 @@
             </div>
             <div class="search-form-container">
                 <form action="" method="post">
-                    <input type="text" placeholder="Поиск..." name="search" value="">
+                    <input type="text" placeholder="Поиск..." name="search" value="<?=@$_POST['search'];?>">
                     <input type="submit" value="OK">
                 </form>
             </div>

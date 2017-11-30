@@ -1,5 +1,4 @@
 #logo {
-
     float: right;
     height: 150px;
     width: 400px;
@@ -8,7 +7,6 @@
     top: 20px;
 }
 .menu li{
-
     display: inline-block;
 }
 .menu-container {
@@ -22,54 +20,54 @@
     top: 100px;
 }
 .content {
-	width:400px;
+    width:400px;
     margin: 140px auto;
 }
 .avatar{
-	width: 40px;   
+    width: 40px;   
     height: 40px;
     border: 1px solid black;
     float:left;
 }
 .post-photo{
-	width: 400px; 
+    width: 400px; 
     height: 250px;
     border: 1px solid black;
     margin: 10px auto; 
 }
 .author {
-	color: #000000;
+    color: #000000;
     height: 15px;
     padding: 3px;
     margin-left: 45px;
 }
 .date{
-	color: #c0c0c0;
-	height: 10px;
-	padding: 3px;
+    color: #c0c0c0;
+    height: 10px;
+    padding: 3px;
     margin-left: 45px;
 }
 .like {
-	width: 30px;
+    width: 30px;
     height: 30px;
     margin: 5px 5px 5px 0px;
     float: left;
-    background:url(images/heart.jpg) left center no-repeat;
+    background:url('images/heart.jpg') left center no-repeat;
     background-size:25px 25px;
 }
 .like-sum {
-	color: #000000;
-	height: 40px;
-	font-size: 150%;
+    color: #000000;
+    height: 40px;
+    font-size: 150%;
     margin-top: 50px;
 }
 .post {
-	color: #000000;
+    color: #000000;
     padding: 5px;
 }
 .post-text{
-	color: #000000;
-	height: 15px;
+    color: #000000;
+    height: 15px;
     margin: 5px 0px;
 }
 .pardon {
