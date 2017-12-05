@@ -2,53 +2,136 @@
 
 class Post {
 
+    private static $post;
+    private static $condition;
     private $data;
     private $data_adv;
-    private static $instance;
     
-    public static function getInstance(){
-        if (empty(self::$instance)) {
-        self::$instance = new self();
+    /**
+    * @param int $post_id
+    * @return \self
+    */
+
+    private function __construct($data = []) {
+        $this->data = $data;
+    }
+    
+    public static function getById($post_id) {
+        if (!empty($post_id)) {
+            self::$condition['value'][] = $post_id;
+            self::$condition['sql'][] = 'post.id = ?';
         }
-        return self::$instance;
+        self::setPost();
+        self::getPost();
+    }
+    
+    public static function getByUser($username) {
+        if (!empty($username)) {
+            self::$condition['value'][] = $username;
+            self::$condition['sql'][] = 'user.username = ?';
+        }
+        self::setPost();
+        self::getPost();
+    }
+    
+    public static function getAllPosts() {
+        self::setPost();
+        self::getPost();
+    }
+    
+    private static function setPost() {
+        $db = self::getConnect();
+        $where = self::getWhere();
+        $bind = self::getBind();
+        $posts = $db->prepare(""
+                . "SELECT *, post.id "
+                . "FROM post INNER JOIN user "
+                . "ON user.user_id = post.user_id "
+                . "{$where}"
+                . "ORDER BY post.id DESC "
+                . "LIMIT 0,20 ");
+        $posts->execute($bind);
+        
+        while ($post = $posts->fetch(PDO::FETCH_ASSOC)) {
+            self::$post[] = new self($post);
+        }
+    }
+    
+    private static function getPost() {
+        $posts = self::$post;
+        foreach ($posts as $post) {
+            $post_id = $post->getPostId();
+            $avatar = $post->getAvatar();
+            $username = $post->getUserName();
+            $added_at = $post->getAddedAt();
+            $photo = $post->getPhoto();
+            $like_sum = $post->getLikeSum();
+            $comment = $post->getComment();
+            require 'assets/html/post.php';
+        }
     }
 
-    private function __construct() {
+    private static function getConnect() {
         $connection = DBconnect::getInstance();
         $db = $connection->getConnection();
-        $post = $db->prepare(""
-                . "SELECT *, post.id "
-                . "AS post_id FROM post "
-                . "INNER JOIN user "
-                . "ON user.user_id = post.user_id "
-                . "ORDER BY post.id DESC");
-        $post->execute();
-        $this->data[] = $post->fetchAll();
-        $post_adv = $db->prepare(""
-                . "SELECT *"
-                . "FROM post_adv"
-                . "ORDER BY post_adv.id DESC");
-        $post_adv->execute();
-        $this->data_adv[] = $post_adv->fetchAll();
+        return $db;
     }
 
-    public function getPhoto() {
+    public static function getSearch($search) {
+        if (!empty($search)) {
+            self::$condition['value'][] = '%' . $search . '%';
+            self::$condition['sql'][] = 'post.username LIKE ?';
+            self::$condition['value'][] = '%' . $search . '%';
+            self::$condition['sql'][] = 'post.comment LIKE ?';
+        }
+    }
+    
+    private static function getWhere() {
+        if (self::$condition['sql']) {
+            $result = 'WHERE ' . implode(', ', self::$condition['sql']);
+        } else {
+            $result = '';
+        }
+        return $result;
+    }
+    
+    private static function getBind() {
+        if (self::$condition['value']) {
+            $result = self::$condition['value'];
+        } else {
+           $result = []; 
+        }
+        return $result;
+    }
+
+    private function getPostId() {
+        return $this->data['id'];
+    }
+    
+    private function getAvatar() {
+        return $this->data['avatar'];
+    }
+    
+    private function getUserName() {
+        return $this->data['username'];
+    }
+    
+    private function getAddedAt() {
+        return $this->data['added_at'];
+    }
+    
+    private function getPhoto() {
         return $this->data['photo'];
     }
 
-    public function setPhoto($value) {
-        $this->data['photo'] = $value;
-        return $this;
+    private function getLikeSum() {
+        return $this->data['like_sum'];
     }
-
+    
     public function getComment() {
         return $this->data['comment'];
     }
 
-    public function setComment($value) {
-        $this->data['comment'] = $value;
-        return $this;
-    }
 
     public function addPost($photo, $comment) {
         $user_id = $_SESSION['user_id'];
@@ -78,26 +161,26 @@ class Post {
         $stmt->execute([$user_id, $added_at, $photo_path, $comment, $like_sum]);
     }
     
-    public function getPost() {
-        
-        foreach ($this->data['0'] as $post){
-            $user_id = $post['user_id'];
-            $post_id = $post['post_id'];
-            $avatar = $post['avatar'];
-            $username = $post['username'];
-            $added_at = $post['added_at'];
-            $photo = $post['photo'];
-            $like_sum = $post['like_sum'];
-            $comment = $post['comment'];
-            
-            require 'assets/html/post.php';
-            
-            if($post['post_id'] % 5 == 0) {
-               $advs = $this->getAdvertising();
-
-            }
-        }
-    }
+//    public function getPost() {
+//        
+//        foreach ($this->data['0'] as $post){
+//            $user_id = $post['user_id'];
+//            $post_id = $post['post_id'];
+//            $avatar = $post['avatar'];
+//            $username = $post['username'];
+//            $added_at = $post['added_at'];
+//            $photo = $post['photo'];
+//            $like_sum = $post['like_sum'];
+//            $comment = $post['comment'];
+//            
+//            require 'assets/html/post.php';
+//            
+//            if($post['post_id'] % 5 == 0) {
+//               $advs = $this->getAdvertising();
+//
+//            }
+//        }
+//    }
     
     public function getAdvertising() {
         

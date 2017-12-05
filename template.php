@@ -31,6 +31,7 @@
             <div class="search-form-container">
                 <form action="" method="post">
                     <input type="text" placeholder="Поиск..." name="search" value="<?=@$_POST['search'];?>">
+                    <input type="hidden" name="act" value="home">
                     <input type="submit" value="OK">
                 </form>
             </div>

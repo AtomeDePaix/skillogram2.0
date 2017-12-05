@@ -92,3 +92,8 @@
     top:150px;
     margin: 20px;
 }
+.search-form {
+    position: absolute;
+    right: 15px;
+    top: 300px;
+}

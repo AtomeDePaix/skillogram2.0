@@ -7,7 +7,6 @@ require 'classes/DBconnect.php';
 require 'classes/User.php';
 require 'classes/Post.php';
 require 'classes/Helper.php';
-//require 'classes/Search.php';
 
 DBconnect::setDbHost($db_host);
 DBconnect::setDbName($db_name);

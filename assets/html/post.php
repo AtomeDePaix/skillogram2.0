@@ -1,5 +1,5 @@
 <div class="content">
-      <div class="post" data-post_id="<?=$post['post_id'];?>">
+      <div class="post" data-post_id="<?=$post_id;?>">
           <div class="avatar" >
               <img src="<?php echo $avatar;?>" width="40" height="40">
           </div>
